@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  name         String
+  email        String       @unique
+  passwordHash String?
+  googleId     String?      @unique
+  createdAt    DateTime     @default(now())
+
+  permissions  Permission[]
+}
+
+model Patient {
+  id          String   @id @default(cuid())
+  name        String
+  birthDate   DateTime?
+  allergies   String?  @db.Text
+  alerts      String?  @db.Text
+  notes       String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  permissions   Permission[]
+  appointments  Appointment[]
+  medications   Medication[]
+  documents     Document[]
+  shareTokens   ShareToken[]
+}
+
+model Permission {
+  id        String          @id @default(cuid())
+  userId    String
+  patientId String
+  role      PermissionRole
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, patientId])
+}
+
+model Appointment {
+  id          String            @id @default(cuid())
+  patientId   String
+  doctorName  String
+  specialty   String?
+  dateTime    DateTime
+  status      AppointmentStatus @default(SCHEDULED)
+  notes       String?           @db.Text
+  createdAt   DateTime          @default(now())
+
+  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  medications Medication[]
+  documents   Document[]
+}
+
+model Medication {
+  id            String         @id @default(cuid())
+  patientId     String
+  appointmentId String?
+  name          String
+  dosage        String?
+  frequency     String?
+  startDate     DateTime?
+  endDate       DateTime?
+  isActive      Boolean        @default(true)
+  source        DataSource     @default(MANUAL)
+  receiptUrl    String?
+  createdAt     DateTime       @default(now())
+
+  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  logs        MedicationLog[]
+}
+
+model MedicationLog {
+  id           String              @id @default(cuid())
+  medicationId String
+  scheduledFor DateTime
+  takenAt      DateTime?
+  status       MedicationLogStatus
+
+  medication Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+}
+
+model Document {
+  id            String     @id @default(cuid())
+  patientId     String
+  appointmentId String?
+  title         String
+  fileUrl       String
+  aiSummary     String?    @db.Text
+  source        DataSource @default(MANUAL)
+  createdAt     DateTime   @default(now())
+
+  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+}
+
+model ShareToken {
+  id          String   @id @default(cuid())
+  patientId   String
+  token       String   @unique @default(uuid())
+  expiresAt   DateTime
+  accessCount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+}
+
+enum PermissionRole {
+  OWNER
+  CAREGIVER
+  VIEWER
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+}
+
+enum DataSource {
+  AI_EXTRACTION
+  MANUAL
+}
+
+enum MedicationLogStatus {
+  TAKEN
+  MISSED
+  SKIPPED
+}
