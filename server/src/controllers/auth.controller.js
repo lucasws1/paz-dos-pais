@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import prisma from "../lib/prisma.js";
+import { catchAsync } from "../lib/catchAsync.js";
 
 const SALT_ROUNDS = 10;
 const JWT_EXPIRES_IN = "7d";
@@ -9,19 +10,23 @@ function signToken(user) {
   return jwt.sign(
     { id: user.id, email: user.email, name: user.name },
     process.env.JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
+    { expiresIn: JWT_EXPIRES_IN },
   );
 }
 
-export async function register(req, res) {
+export const register = catchAsync(async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
-    return res.status(400).json({ error: "name, email e password são obrigatórios." });
+    return res
+      .status(400)
+      .json({ error: "name, email e password são obrigatórios." });
   }
 
   if (password.length < 8) {
-    return res.status(400).json({ error: "A senha deve ter pelo menos 8 caracteres." });
+    return res
+      .status(400)
+      .json({ error: "A senha deve ter pelo menos 8 caracteres." });
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });
@@ -39,13 +44,15 @@ export async function register(req, res) {
   const token = signToken(user);
 
   return res.status(201).json({ token, user });
-}
+});
 
-export async function login(req, res) {
+export const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ error: "email e password são obrigatórios." });
+    return res
+      .status(400)
+      .json({ error: "email e password são obrigatórios." });
   }
 
   const user = await prisma.user.findUnique({ where: { email } });
@@ -64,6 +71,11 @@ export async function login(req, res) {
 
   return res.json({
     token,
-    user: { id: user.id, name: user.name, email: user.email, createdAt: user.createdAt },
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      createdAt: user.createdAt,
+    },
   });
-}
+});

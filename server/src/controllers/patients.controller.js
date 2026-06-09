@@ -1,18 +1,22 @@
 import prisma from "../lib/prisma.js";
+import { catchAsync } from "../lib/catchAsync.js";
 
-export async function listPatients(req, res) {
+export const listPatients = catchAsync(async (req, res) => {
   const permissions = await prisma.permission.findMany({
     where: { userId: req.user.id },
     include: { patient: true },
     orderBy: { patient: { name: "asc" } },
   });
 
-  const patients = permissions.map(({ patient, role }) => ({ ...patient, role }));
+  const patients = permissions.map(({ patient, role }) => ({
+    ...patient,
+    role,
+  }));
 
   return res.json(patients);
-}
+});
 
-export async function createPatient(req, res) {
+export const createPatient = catchAsync(async (req, res) => {
   const { name, birthDate, allergies, alerts, notes } = req.body;
 
   if (!name) {
@@ -38,9 +42,9 @@ export async function createPatient(req, res) {
   });
 
   return res.status(201).json(patient);
-}
+});
 
-export async function getPatient(req, res) {
+export const getPatient = catchAsync(async (req, res) => {
   const { patientId } = req.params;
 
   const patient = await prisma.patient.findUnique({ where: { id: patientId } });
@@ -50,21 +54,24 @@ export async function getPatient(req, res) {
   }
 
   return res.json({ ...patient, role: req.permission.role });
-}
+});
 
-export async function updatePatient(req, res) {
+export const updatePatient = catchAsync(async (req, res) => {
   const { patientId } = req.params;
   const { name, birthDate, allergies, alerts, notes } = req.body;
 
   const data = {};
   if (name !== undefined) data.name = name;
-  if (birthDate !== undefined) data.birthDate = birthDate ? new Date(birthDate) : null;
+  if (birthDate !== undefined)
+    data.birthDate = birthDate ? new Date(birthDate) : null;
   if (allergies !== undefined) data.allergies = allergies;
   if (alerts !== undefined) data.alerts = alerts;
   if (notes !== undefined) data.notes = notes;
 
   if (Object.keys(data).length === 0) {
-    return res.status(400).json({ error: "Nenhum campo para atualizar foi enviado." });
+    return res
+      .status(400)
+      .json({ error: "Nenhum campo para atualizar foi enviado." });
   }
 
   const patient = await prisma.patient.update({
@@ -73,12 +80,12 @@ export async function updatePatient(req, res) {
   });
 
   return res.json(patient);
-}
+});
 
-export async function deletePatient(req, res) {
+export const deletePatient = catchAsync(async (req, res) => {
   const { patientId } = req.params;
 
   await prisma.patient.delete({ where: { id: patientId } });
 
   return res.status(204).send();
-}
+});

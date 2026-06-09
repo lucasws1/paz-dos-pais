@@ -1,13 +1,16 @@
 import prisma from "../lib/prisma.js";
+import { catchAsync } from "../lib/catchAsync.js";
 
 const VALID_STATUSES = ["SCHEDULED", "COMPLETED", "CANCELED"];
 
-export async function listAppointments(req, res) {
+export const listAppointments = catchAsync(async (req, res) => {
   const { patientId } = req.params;
   const { status } = req.query;
 
   if (status && !VALID_STATUSES.includes(status)) {
-    return res.status(400).json({ error: `status inválido. Use: ${VALID_STATUSES.join(", ")}.` });
+    return res
+      .status(400)
+      .json({ error: `status inválido. Use: ${VALID_STATUSES.join(", ")}.` });
   }
 
   const appointments = await prisma.appointment.findMany({
@@ -19,18 +22,22 @@ export async function listAppointments(req, res) {
   });
 
   return res.json(appointments);
-}
+});
 
-export async function createAppointment(req, res) {
+export const createAppointment = catchAsync(async (req, res) => {
   const { patientId } = req.params;
   const { doctorName, specialty, dateTime, status, notes } = req.body;
 
   if (!doctorName || !dateTime) {
-    return res.status(400).json({ error: "doctorName e dateTime são obrigatórios." });
+    return res
+      .status(400)
+      .json({ error: "doctorName e dateTime são obrigatórios." });
   }
 
   if (status && !VALID_STATUSES.includes(status)) {
-    return res.status(400).json({ error: `status inválido. Use: ${VALID_STATUSES.join(", ")}.` });
+    return res
+      .status(400)
+      .json({ error: `status inválido. Use: ${VALID_STATUSES.join(", ")}.` });
   }
 
   const appointment = await prisma.appointment.create({
@@ -45,9 +52,9 @@ export async function createAppointment(req, res) {
   });
 
   return res.status(201).json(appointment);
-}
+});
 
-export async function getAppointment(req, res) {
+export const getAppointment = catchAsync(async (req, res) => {
   const { patientId, appointmentId } = req.params;
 
   const appointment = await prisma.appointment.findFirst({
@@ -59,9 +66,9 @@ export async function getAppointment(req, res) {
   }
 
   return res.json(appointment);
-}
+});
 
-export async function updateAppointment(req, res) {
+export const updateAppointment = catchAsync(async (req, res) => {
   const { patientId, appointmentId } = req.params;
   const { doctorName, specialty, dateTime, status, notes } = req.body;
 
@@ -74,7 +81,9 @@ export async function updateAppointment(req, res) {
   }
 
   if (status && !VALID_STATUSES.includes(status)) {
-    return res.status(400).json({ error: `status inválido. Use: ${VALID_STATUSES.join(", ")}.` });
+    return res
+      .status(400)
+      .json({ error: `status inválido. Use: ${VALID_STATUSES.join(", ")}.` });
   }
 
   const data = {};
@@ -85,7 +94,9 @@ export async function updateAppointment(req, res) {
   if (notes !== undefined) data.notes = notes;
 
   if (Object.keys(data).length === 0) {
-    return res.status(400).json({ error: "Nenhum campo para atualizar foi enviado." });
+    return res
+      .status(400)
+      .json({ error: "Nenhum campo para atualizar foi enviado." });
   }
 
   const appointment = await prisma.appointment.update({
@@ -94,9 +105,9 @@ export async function updateAppointment(req, res) {
   });
 
   return res.json(appointment);
-}
+});
 
-export async function deleteAppointment(req, res) {
+export const deleteAppointment = catchAsync(async (req, res) => {
   const { patientId, appointmentId } = req.params;
 
   const existing = await prisma.appointment.findFirst({
@@ -110,4 +121,4 @@ export async function deleteAppointment(req, res) {
   await prisma.appointment.delete({ where: { id: appointmentId } });
 
   return res.status(204).send();
-}
+});
