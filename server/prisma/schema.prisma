@@ -8,34 +8,34 @@ datasource db {
 }
 
 model User {
-  id           String       @id @default(cuid())
+  id           String   @id @default(cuid())
   name         String
-  email        String       @unique
+  email        String   @unique
   passwordHash String?
-  googleId     String?      @unique
-  createdAt    DateTime     @default(now())
+  googleId     String?  @unique
+  createdAt    DateTime @default(now())
 
-  permissions  Permission[]
+  permissions Permission[]
 }
 
 model Patient {
-  id          String   @id @default(cuid())
-  name        String
-  birthDate   DateTime?
-  allergies   String?  @db.Text
-  alerts      String?  @db.Text
-  notes       String?  @db.Text
-  createdAt   DateTime @default(now())
+  id        String    @id @default(cuid())
+  name      String
+  birthDate DateTime?
+  allergies String?   @db.Text
+  alerts    String?   @db.Text
+  notes     String?   @db.Text
+  createdAt DateTime  @default(now())
 
-  permissions   Permission[]
-  appointments  Appointment[]
-  medications   Medication[]
-  documents     Document[]
-  shareTokens   ShareToken[]
+  permissions  Permission[]
+  appointments Appointment[]
+  medications  Medication[]
+  documents    Document[]
+  shareTokens  ShareToken[]
 }
 
 model Permission {
-  id        String          @id @default(cuid())
+  id        String         @id @default(cuid())
   userId    String
   patientId String
   role      PermissionRole
@@ -47,14 +47,14 @@ model Permission {
 }
 
 model Appointment {
-  id          String            @id @default(cuid())
-  patientId   String
-  doctorName  String
-  specialty   String?
-  dateTime    DateTime
-  status      AppointmentStatus @default(SCHEDULED)
-  notes       String?           @db.Text
-  createdAt   DateTime          @default(now())
+  id         String            @id @default(cuid())
+  patientId  String
+  doctorName String
+  specialty  String?
+  dateTime   DateTime
+  status     AppointmentStatus @default(SCHEDULED)
+  notes      String?           @db.Text
+  createdAt  DateTime          @default(now())
 
   patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
   medications Medication[]
@@ -62,7 +62,7 @@ model Appointment {
 }
 
 model Medication {
-  id            String         @id @default(cuid())
+  id            String     @id @default(cuid())
   patientId     String
   appointmentId String?
   name          String
@@ -70,13 +70,13 @@ model Medication {
   frequency     String?
   startDate     DateTime?
   endDate       DateTime?
-  isActive      Boolean        @default(true)
-  source        DataSource     @default(MANUAL)
+  isActive      Boolean    @default(true)
+  source        DataSource @default(MANUAL)
   receiptUrl    String?
-  createdAt     DateTime       @default(now())
+  createdAt     DateTime   @default(now())
 
-  patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
-  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+  patient     Patient         @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  appointment Appointment?    @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
   logs        MedicationLog[]
 }
 
