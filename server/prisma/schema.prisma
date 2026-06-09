@@ -96,6 +96,7 @@ model Document {
   appointmentId String?
   title         String
   fileUrl       String
+  fileKey       String
   aiSummary     String?    @db.Text
   source        DataSource @default(MANUAL)
   createdAt     DateTime   @default(now())

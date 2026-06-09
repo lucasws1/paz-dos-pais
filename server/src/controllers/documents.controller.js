@@ -1,5 +1,6 @@
 import prisma from "../lib/prisma.js";
 import { catchAsync } from "../lib/catchAsync.js";
+import { uploadFile, deleteFile } from "../services/storage.service.js";
 
 const VALID_SOURCES = ["MANUAL", "AI_EXTRACTION"];
 
@@ -8,10 +9,7 @@ export const listDocuments = catchAsync(async (req, res) => {
   const { appointmentId } = req.query;
 
   const where = { patientId };
-
-  if (appointmentId) {
-    where.appointmentId = appointmentId;
-  }
+  if (appointmentId) where.appointmentId = appointmentId;
 
   const documents = await prisma.document.findMany({
     where,
@@ -23,10 +21,15 @@ export const listDocuments = catchAsync(async (req, res) => {
 
 export const createDocument = catchAsync(async (req, res) => {
   const { patientId } = req.params;
-  const { title, fileUrl, aiSummary, source, appointmentId } = req.body;
 
-  if (!title || !fileUrl) {
-    return res.status(400).json({ error: "title e fileUrl são obrigatórios." });
+  if (!req.file) {
+    return res.status(400).json({ error: "É obrigatório enviar um arquivo." });
+  }
+
+  const { title, aiSummary, source, appointmentId } = req.body;
+
+  if (!title) {
+    return res.status(400).json({ error: "title é obrigatório." });
   }
 
   if (source && !VALID_SOURCES.includes(source)) {
@@ -35,11 +38,14 @@ export const createDocument = catchAsync(async (req, res) => {
       .json({ error: `source inválido. Use: ${VALID_SOURCES.join(", ")}.` });
   }
 
+  const { key, url } = await uploadFile(req.file, `patients/${patientId}`);
+
   const document = await prisma.document.create({
     data: {
       patientId,
       title,
-      fileUrl,
+      fileUrl: url,
+      fileKey: key,
       aiSummary: aiSummary ?? null,
       source: source ?? "MANUAL",
       appointmentId: appointmentId ?? null,
@@ -65,7 +71,7 @@ export const getDocument = catchAsync(async (req, res) => {
 
 export const updateDocument = catchAsync(async (req, res) => {
   const { patientId, documentId } = req.params;
-  const { title, fileUrl, aiSummary, source, appointmentId } = req.body;
+  const { title, aiSummary, source, appointmentId } = req.body;
 
   const existing = await prisma.document.findFirst({
     where: { id: documentId, patientId },
@@ -83,7 +89,6 @@ export const updateDocument = catchAsync(async (req, res) => {
 
   const data = {};
   if (title !== undefined) data.title = title;
-  if (fileUrl !== undefined) data.fileUrl = fileUrl;
   if (aiSummary !== undefined) data.aiSummary = aiSummary;
   if (source !== undefined) data.source = source;
   if (appointmentId !== undefined) data.appointmentId = appointmentId;
@@ -113,7 +118,11 @@ export const deleteDocument = catchAsync(async (req, res) => {
     return res.status(404).json({ error: "Documento não encontrado." });
   }
 
-  await prisma.document.delete({ where: { id: documentId } });
+  // Deleta do banco e do R2 em paralelo
+  await Promise.all([
+    prisma.document.delete({ where: { id: documentId } }),
+    deleteFile(existing.fileKey),
+  ]);
 
   return res.status(204).send();
 });
