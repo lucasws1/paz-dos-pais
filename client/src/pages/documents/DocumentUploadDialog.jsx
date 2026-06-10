@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Upload } from "lucide-react";
+import { Sparkles, Upload } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +27,25 @@ export default function DocumentUploadDialog({ open, onOpenChange, patientId }) 
   const [aiSummary, setAiSummary] = useState("");
   const [titleError, setTitleError] = useState("");
   const [fileError, setFileError] = useState("");
+  const [aiUsed, setAiUsed] = useState(false);
+
+  // Envia o arquivo para análise por IA e pré-preenche título e resumo.
+  // Nada é salvo: o usuário revisa e só então confirma o envio.
+  const analyzeMutation = useMutation({
+    mutationFn: () => {
+      const formData = new FormData();
+      formData.append("file", file);
+      return api
+        .post(`/patients/${patientId}/documents/analyze`, formData)
+        .then((r) => r.data);
+    },
+    onSuccess: (data) => {
+      if (data.title) setTitle(data.title);
+      if (data.aiSummary) setAiSummary(data.aiSummary);
+      setAiUsed(true);
+      setTitleError("");
+    },
+  });
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -34,7 +53,7 @@ export default function DocumentUploadDialog({ open, onOpenChange, patientId }) 
       formData.append("file", file);
       formData.append("title", title.trim());
       if (aiSummary.trim()) formData.append("aiSummary", aiSummary.trim());
-      formData.append("source", "MANUAL");
+      formData.append("source", aiUsed ? "AI_EXTRACTION" : "MANUAL");
       return api
         .post(`/patients/${patientId}/documents`, formData)
         .then((r) => r.data);
@@ -49,6 +68,7 @@ export default function DocumentUploadDialog({ open, onOpenChange, patientId }) 
     const selected = e.target.files?.[0] ?? null;
     setFile(selected);
     setFileError("");
+    setAiUsed(false);
     if (selected && !title) {
       setTitle(stripExtension(selected.name));
       setTitleError("");
@@ -61,6 +81,7 @@ export default function DocumentUploadDialog({ open, onOpenChange, patientId }) 
     if (!dropped) return;
     setFile(dropped);
     setFileError("");
+    setAiUsed(false);
     if (!title) {
       setTitle(stripExtension(dropped.name));
       setTitleError("");
@@ -87,13 +108,15 @@ export default function DocumentUploadDialog({ open, onOpenChange, patientId }) 
   }
 
   function handleClose() {
-    if (mutation.isPending) return;
+    if (mutation.isPending || analyzeMutation.isPending) return;
     setFile(null);
     setTitle("");
     setAiSummary("");
     setTitleError("");
     setFileError("");
+    setAiUsed(false);
     mutation.reset();
+    analyzeMutation.reset();
     onOpenChange(false);
   }
 
@@ -145,6 +168,35 @@ export default function DocumentUploadDialog({ open, onOpenChange, patientId }) 
             />
             {fileError && (
               <p className="text-destructive text-xs">{fileError}</p>
+            )}
+
+            {file && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="self-start"
+                disabled={analyzeMutation.isPending}
+                onClick={() => analyzeMutation.mutate()}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                {analyzeMutation.isPending
+                  ? "Analisando…"
+                  : aiUsed
+                    ? "Analisar novamente"
+                    : "Preencher com IA"}
+              </Button>
+            )}
+            {analyzeMutation.isError && (
+              <p className="text-destructive text-xs">
+                {analyzeMutation.error?.response?.data?.error ??
+                  "Erro ao analisar o documento. Tente novamente."}
+              </p>
+            )}
+            {aiUsed && !analyzeMutation.isPending && (
+              <p className="text-muted-foreground text-xs">
+                Título e resumo preenchidos pela IA — revise antes de enviar.
+              </p>
             )}
           </div>
 
