@@ -4,6 +4,7 @@ import authRoutes from "./routes/auth.routes.js";
 import patientsRoutes from "./routes/patients.routes.js";
 import appointmentsRoutes from "./routes/appointments.routes.js";
 import medicationsRoutes from "./routes/medications.routes.js";
+import medicationLogsRoutes from "./routes/medicationLogs.routes.js";
 import documentsRoutes from "./routes/documents.routes.js";
 import shareRoutes from "./routes/share.routes.js";
 
@@ -18,6 +19,7 @@ app.use("/auth", authRoutes);
 app.use("/patients", patientsRoutes);
 app.use("/patients/:patientId/appointments", appointmentsRoutes);
 app.use("/patients/:patientId/medications", medicationsRoutes);
+app.use("/patients/:patientId/medication-logs", medicationLogsRoutes);
 app.use("/patients/:patientId/documents", documentsRoutes);
 app.use("/share", shareRoutes);
 

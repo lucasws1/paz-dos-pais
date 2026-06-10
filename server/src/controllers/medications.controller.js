@@ -1,7 +1,26 @@
 import prisma from "../lib/prisma.js";
 import { catchAsync } from "../lib/catchAsync.js";
+import { uploadFile } from "../services/storage.service.js";
+import { extractMedicationsFromImage } from "../services/ai.service.js";
 
 const VALID_SOURCES = ["MANUAL", "AI_EXTRACTION"];
+const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+function parseTimes(times) {
+  return String(times)
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+}
+
+function isValidTimes(times) {
+  const parsed = parseTimes(times);
+  return parsed.length > 0 && parsed.every((t) => TIME_REGEX.test(t));
+}
+
+function normalizeTimes(times) {
+  return parseTimes(times).sort().join(",");
+}
 
 export const listMedications = catchAsync(async (req, res) => {
   const { patientId } = req.params;
@@ -31,6 +50,7 @@ export const createMedication = catchAsync(async (req, res) => {
     name,
     dosage,
     frequency,
+    times,
     startDate,
     endDate,
     isActive,
@@ -41,6 +61,12 @@ export const createMedication = catchAsync(async (req, res) => {
 
   if (!name) {
     return res.status(400).json({ error: "name é obrigatório." });
+  }
+
+  if (times && !isValidTimes(times)) {
+    return res
+      .status(400)
+      .json({ error: 'times inválido. Use horários HH:mm separados por vírgula, ex: "08:00,20:00".' });
   }
 
   if (source && !VALID_SOURCES.includes(source)) {
@@ -55,6 +81,7 @@ export const createMedication = catchAsync(async (req, res) => {
       name,
       dosage: dosage ?? null,
       frequency: frequency ?? null,
+      times: times ? normalizeTimes(times) : null,
       startDate: startDate ? new Date(startDate) : null,
       endDate: endDate ? new Date(endDate) : null,
       isActive: isActive !== undefined ? Boolean(isActive) : true,
@@ -87,6 +114,7 @@ export const updateMedication = catchAsync(async (req, res) => {
     name,
     dosage,
     frequency,
+    times,
     startDate,
     endDate,
     isActive,
@@ -109,10 +137,17 @@ export const updateMedication = catchAsync(async (req, res) => {
       .json({ error: `source inválido. Use: ${VALID_SOURCES.join(", ")}.` });
   }
 
+  if (times && !isValidTimes(times)) {
+    return res
+      .status(400)
+      .json({ error: 'times inválido. Use horários HH:mm separados por vírgula, ex: "08:00,20:00".' });
+  }
+
   const data = {};
   if (name !== undefined) data.name = name;
   if (dosage !== undefined) data.dosage = dosage;
   if (frequency !== undefined) data.frequency = frequency;
+  if (times !== undefined) data.times = times ? normalizeTimes(times) : null;
   if (startDate !== undefined)
     data.startDate = startDate ? new Date(startDate) : null;
   if (endDate !== undefined) data.endDate = endDate ? new Date(endDate) : null;
@@ -133,6 +168,28 @@ export const updateMedication = catchAsync(async (req, res) => {
   });
 
   return res.json(medication);
+});
+
+/**
+ * Extrai medicamentos de uma foto de receita via IA. NÃO salva nada no banco —
+ * devolve os candidatos para revisão humana no frontend (e a URL da receita
+ * já enviada ao storage, para vincular aos medicamentos confirmados).
+ */
+export const extractFromReceipt = catchAsync(async (req, res) => {
+  const { patientId } = req.params;
+
+  if (!req.file) {
+    return res
+      .status(400)
+      .json({ error: "É obrigatório enviar a foto da receita." });
+  }
+
+  const [{ url: receiptUrl }, { medications }] = await Promise.all([
+    uploadFile(req.file, `patients/${patientId}/receipts`),
+    extractMedicationsFromImage(req.file.buffer, req.file.mimetype),
+  ]);
+
+  return res.json({ receiptUrl, medications });
 });
 
 export const deleteMedication = catchAsync(async (req, res) => {

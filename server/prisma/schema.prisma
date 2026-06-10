@@ -47,14 +47,15 @@ model Permission {
 }
 
 model Appointment {
-  id         String            @id @default(cuid())
-  patientId  String
-  doctorName String
-  specialty  String?
-  dateTime   DateTime
-  status     AppointmentStatus @default(SCHEDULED)
-  notes      String?           @db.Text
-  createdAt  DateTime          @default(now())
+  id             String            @id @default(cuid())
+  patientId      String
+  doctorName     String
+  specialty      String?
+  dateTime       DateTime
+  status         AppointmentStatus @default(SCHEDULED)
+  notes          String?           @db.Text
+  reminderSentAt DateTime?
+  createdAt      DateTime          @default(now())
 
   patient     Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
   medications Medication[]
@@ -68,6 +69,7 @@ model Medication {
   name          String
   dosage        String?
   frequency     String?
+  times         String? // horários das doses, separados por vírgula: "08:00,20:00"
   startDate     DateTime?
   endDate       DateTime?
   isActive      Boolean    @default(true)
@@ -85,9 +87,12 @@ model MedicationLog {
   medicationId String
   scheduledFor DateTime
   takenAt      DateTime?
-  status       MedicationLogStatus
+  status       MedicationLogStatus @default(PENDING)
+  createdAt    DateTime            @default(now())
 
   medication Medication @relation(fields: [medicationId], references: [id], onDelete: Cascade)
+
+  @@unique([medicationId, scheduledFor])
 }
 
 model Document {
@@ -134,6 +139,7 @@ enum DataSource {
 }
 
 enum MedicationLogStatus {
+  PENDING
   TAKEN
   MISSED
   SKIPPED

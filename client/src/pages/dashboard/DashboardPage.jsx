@@ -1,12 +1,12 @@
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { differenceInYears, format, isToday, isFuture } from "date-fns";
+import { differenceInYears, format, isFuture } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Pill, Calendar, FileText, AlertTriangle, QrCode, Plus, Clock } from "lucide-react";
+import { Pill, Calendar, FileText, AlertTriangle, QrCode, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import api from "@/services/api";
 import { usePatient } from "@/context/PatientContext";
 
@@ -31,9 +31,7 @@ function StatCard({ icon: Icon, label, value, sub, color = "text-primary" }) {
   );
 }
 
-function MedicationRow({ medication }) {
-  const taken = false; // será implementado com MedicationLogs
-
+function MedicationRow({ medication, taken }) {
   return (
     <div className="flex items-center gap-3 py-3">
       <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
@@ -99,6 +97,22 @@ export default function DashboardPage() {
   const { data: documents = [] } = useQuery({
     queryKey: ["documents", patientId],
     queryFn: () => api.get(`/patients/${patientId}/documents`).then((r) => r.data),
+    enabled: !!patientId,
+  });
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const { data: todayLogs = [] } = useQuery({
+    queryKey: ["medication-logs", patientId, format(todayStart, "yyyy-MM-dd")],
+    queryFn: () =>
+      api
+        .get(`/patients/${patientId}/medication-logs`, {
+          params: { from: todayStart.toISOString(), to: todayEnd.toISOString() },
+        })
+        .then((r) => r.data),
     enabled: !!patientId,
   });
 
@@ -213,8 +227,13 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base">Remédios de hoje</CardTitle>
-            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-auto p-0">
-              Ver todos
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-xs text-muted-foreground h-auto p-0"
+            >
+              <Link to="/doses">Ver todos</Link>
             </Button>
           </CardHeader>
           <CardContent className="pt-0">
@@ -225,7 +244,14 @@ export default function DashboardPage() {
             ) : (
               <div className="divide-y">
                 {todayMeds.map((med) => (
-                  <MedicationRow key={med.id} medication={med} />
+                  <MedicationRow
+                    key={med.id}
+                    medication={med}
+                    taken={todayLogs.some(
+                      (log) =>
+                        log.medicationId === med.id && log.status === "TAKEN",
+                    )}
+                  />
                 ))}
               </div>
             )}
@@ -236,8 +262,13 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-base">Próxima consulta</CardTitle>
-            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground h-auto p-0">
-              Ver agenda
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="text-xs text-muted-foreground h-auto p-0"
+            >
+              <Link to="/appointments">Ver agenda</Link>
             </Button>
           </CardHeader>
           <CardContent className="flex flex-col gap-3 pt-0">
