@@ -1,6 +1,7 @@
 import prisma from "../lib/prisma.js";
 import { catchAsync } from "../lib/catchAsync.js";
 import { uploadFile, deleteFile } from "../services/storage.service.js";
+import { analyzeDocument } from "../services/ai.service.js";
 
 const VALID_SOURCES = ["MANUAL", "AI_EXTRACTION"];
 
@@ -53,6 +54,23 @@ export const createDocument = catchAsync(async (req, res) => {
   });
 
   return res.status(201).json(document);
+});
+
+/**
+ * Analisa um documento via IA e devolve título + resumo sugeridos.
+ * NÃO salva nada — o frontend exibe para revisão antes do upload definitivo.
+ */
+export const analyzeDocumentFile = catchAsync(async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "É obrigatório enviar um arquivo." });
+  }
+
+  const { title, summary } = await analyzeDocument(
+    req.file.buffer,
+    req.file.mimetype,
+  );
+
+  return res.json({ title, aiSummary: summary });
 });
 
 export const getDocument = catchAsync(async (req, res) => {

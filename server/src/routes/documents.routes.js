@@ -8,6 +8,7 @@ import {
   getDocument,
   updateDocument,
   deleteDocument,
+  analyzeDocumentFile,
 } from "../controllers/documents.controller.js";
 
 const router = Router({ mergeParams: true });
@@ -42,6 +43,12 @@ router.post(
   requirePermission("OWNER", "CAREGIVER"),
   upload.single("file"),
   createDocument,
+);
+router.post(
+  "/analyze",
+  requirePermission("OWNER", "CAREGIVER"),
+  upload.single("file"),
+  analyzeDocumentFile,
 );
 router.get("/:documentId", requirePermission(), getDocument);
 router.put(
