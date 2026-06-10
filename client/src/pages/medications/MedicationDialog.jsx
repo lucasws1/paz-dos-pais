@@ -17,10 +17,21 @@ const EMPTY_FORM = {
   name: "",
   dosage: "",
   frequency: "",
+  times: "",
   startDate: "",
   endDate: "",
   isActive: true,
 };
+
+const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+function isValidTimes(times) {
+  return times
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean)
+    .every((t) => TIME_REGEX.test(t));
+}
 
 function toISOOrNull(dateString) {
   if (!dateString) return null;
@@ -38,6 +49,7 @@ function buildForm(medication) {
     name: medication.name ?? "",
     dosage: medication.dosage ?? "",
     frequency: medication.frequency ?? "",
+    times: medication.times ?? "",
     startDate: toInputDate(medication.startDate),
     endDate: toInputDate(medication.endDate),
     isActive: medication.isActive ?? true,
@@ -74,6 +86,8 @@ export default function MedicationDialog({
   function validate() {
     const errs = {};
     if (!form.name.trim()) errs.name = "Nome é obrigatório.";
+    if (form.times.trim() && !isValidTimes(form.times))
+      errs.times = "Use horários HH:mm separados por vírgula. Ex: 08:00, 20:00";
     return errs;
   }
 
@@ -88,6 +102,7 @@ export default function MedicationDialog({
       name: form.name.trim(),
       dosage: form.dosage.trim() || null,
       frequency: form.frequency.trim() || null,
+      times: form.times.trim() || null,
       startDate: toISOOrNull(form.startDate),
       endDate: toISOOrNull(form.endDate),
       isActive: form.isActive,
@@ -145,6 +160,24 @@ export default function MedicationDialog({
                 onChange={(e) => set("frequency", e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Horários das doses */}
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="med-times">Horários das doses</Label>
+            <Input
+              id="med-times"
+              placeholder="Ex: 08:00, 20:00"
+              value={form.times}
+              onChange={(e) => set("times", e.target.value)}
+            />
+            {errors.times ? (
+              <p className="text-destructive text-xs">{errors.times}</p>
+            ) : (
+              <p className="text-muted-foreground text-xs">
+                Usados nos lembretes por e-mail e na lista de doses do dia.
+              </p>
+            )}
           </div>
 
           {/* Datas */}

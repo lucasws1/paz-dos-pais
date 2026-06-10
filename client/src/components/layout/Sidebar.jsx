@@ -1,25 +1,32 @@
+import { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Pill,
+  ClipboardCheck,
   Calendar,
   FileText,
   Share2,
+  UserRound,
   LogOut,
   Heart,
+  Plus,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/AuthContext";
 import { usePatient } from "@/context/PatientContext";
+import PatientDialog from "@/pages/patient/PatientDialog";
 
 const NAV_ITEMS = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Painel" },
+  { to: "/doses", icon: ClipboardCheck, label: "Doses de hoje" },
   { to: "/medications", icon: Pill, label: "Medicamentos" },
   { to: "/appointments", icon: Calendar, label: "Consultas" },
   { to: "/documents", icon: FileText, label: "Documentos" },
   { to: "/share", icon: Share2, label: "Compartilhar" },
+  { to: "/patient", icon: UserRound, label: "Paciente" },
 ];
 
 function initials(name = "") {
@@ -35,6 +42,7 @@ export default function Sidebar() {
   const { user, logout } = useAuth();
   const { patients, activePatient, setActivePatient } = usePatient();
   const navigate = useNavigate();
+  const [patientDialogOpen, setPatientDialogOpen] = useState(false);
 
   function handleLogout() {
     logout();
@@ -76,9 +84,18 @@ export default function Sidebar() {
 
       {/* Lista de pacientes */}
       <div className="px-3 py-3">
-        <p className="mb-2 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          Pacientes
-        </p>
+        <div className="mb-2 flex items-center justify-between px-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Pacientes
+          </p>
+          <button
+            onClick={() => setPatientDialogOpen(true)}
+            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            title="Adicionar paciente"
+          >
+            <Plus className="h-3.5 w-3.5" />
+          </button>
+        </div>
         <div className="space-y-0.5">
           {patients.map((patient) => (
             <button
@@ -127,6 +144,11 @@ export default function Sidebar() {
           <LogOut className="h-4 w-4" />
         </button>
       </div>
+
+      <PatientDialog
+        open={patientDialogOpen}
+        onOpenChange={setPatientDialogOpen}
+      />
     </aside>
   );
 }
