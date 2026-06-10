@@ -70,7 +70,7 @@ export async function sendDoseReminderEmail({ to, patientName, medication, time 
 
   return sendEmail({
     to,
-    subject: `💊 Hora do remédio de ${patientName}: ${medication.name} (${time})`,
+    subject: `💊 Hora do remédio de ${safePatientName}: ${safeMedicationName} (${safeTime})`,
     html: layout(
       `Hora do remédio — ${safeTime}`,
       `
@@ -102,7 +102,7 @@ export async function sendAppointmentReminderEmail({ to, patientName, appointmen
 
   return sendEmail({
     to,
-    subject: `📅 Consulta de ${patientName} amanhã: ${appointment.doctorName}`,
+    subject: `📅 Consulta de ${safePatientName} amanhã: ${safeDoctorName}`,
     html: layout(
       "Consulta nas próximas 24 horas",
       `
