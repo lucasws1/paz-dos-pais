@@ -39,7 +39,7 @@ function DoseRow({ medication, scheduledFor, log, onMark, isPending }) {
 
   return (
     <div className="flex items-center gap-3 py-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-primary">
         <Pill className="h-4 w-4" />
       </div>
 
@@ -235,7 +235,7 @@ export default function DosesPage() {
                   key={medication.id}
                   className="flex items-center gap-3 py-3"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-primary">
                     <Pill className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">

@@ -54,7 +54,7 @@ function MedicationCard({ medication, onEdit, onDelete, onToggleActive }) {
     <Card>
       <CardContent className="flex items-start gap-4 pt-5 pb-4">
         {/* Ícone */}
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary">
           <Pill className="h-5 w-5" />
         </div>
 

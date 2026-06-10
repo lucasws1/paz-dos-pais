@@ -34,7 +34,7 @@ function StatCard({ icon: Icon, label, value, sub, color = "text-primary" }) {
 function MedicationRow({ medication, taken }) {
   return (
     <div className="flex items-center gap-3 py-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-primary">
         <Pill className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">

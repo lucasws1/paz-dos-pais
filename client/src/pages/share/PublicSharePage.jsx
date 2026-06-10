@@ -30,7 +30,7 @@ function formatDate(isoString) {
 
 function CenteredMessage({ children }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-6">
+    <div className="flex min-h-screen items-center justify-center bg-background p-6">
       <div className="text-center">{children}</div>
     </div>
   );
@@ -39,8 +39,8 @@ function CenteredMessage({ children }) {
 function LoadingState() {
   return (
     <CenteredMessage>
-      <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-rose-500" />
-      <p className="text-sm text-gray-600">
+      <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-primary" />
+      <p className="text-sm text-muted-foreground">
         Carregando informações do paciente…
       </p>
     </CenteredMessage>
@@ -57,10 +57,10 @@ function ErrorState({ status }) {
 
   return (
     <CenteredMessage>
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 mx-auto">
-        <Heart className="h-8 w-8 text-rose-400" />
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent mx-auto">
+        <Heart className="h-8 w-8 text-primary" />
       </div>
-      <p className="text-base font-medium text-gray-800">{message}</p>
+      <p className="text-base font-medium text-foreground">{message}</p>
     </CenteredMessage>
   );
 }
@@ -93,17 +93,22 @@ export default function PublicSharePage() {
   const age = calcAge(patient.birthDate);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b bg-white px-6 py-4">
+      <header className="bg-card border-b px-6 py-4">
         <div className="mx-auto flex max-w-2xl items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Heart className="h-5 w-5 fill-rose-500 text-rose-500" />
-            <span className="text-base font-semibold text-gray-900">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-primary flex h-7 w-7 items-center justify-center rounded-md">
+              <Heart
+                className="text-primary-foreground h-3.5 w-3.5"
+                fill="currentColor"
+              />
+            </div>
+            <span className="text-base font-semibold text-foreground">
               Paz dos Pais
             </span>
           </div>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-muted-foreground">
             Resumo médico — acesso temporário
           </span>
         </div>
@@ -118,10 +123,10 @@ export default function PublicSharePage() {
           </CardHeader>
           <CardContent className="flex flex-col gap-3">
             <div>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className="text-lg font-semibold text-foreground">
                 {patient.name}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {age !== null ? `${age} anos` : ""}
                 {patient.birthDate && (
                   <> · Nascido em {formatDate(patient.birthDate)}</>
@@ -132,7 +137,7 @@ export default function PublicSharePage() {
             {/* Alergias */}
             {patient.allergies && patient.allergies.length > 0 && (
               <div className="flex flex-col gap-1.5">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Alergias
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -151,7 +156,7 @@ export default function PublicSharePage() {
             {/* Alertas */}
             {patient.alerts && patient.alerts.length > 0 && (
               <div className="flex flex-col gap-1.5">
-                <p className="text-xs font-medium uppercase tracking-wide text-gray-400">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Alertas
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -173,23 +178,23 @@ export default function PublicSharePage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <Pill className="h-4 w-4 text-blue-500" />
+              <Pill className="h-4 w-4 text-primary" />
               Medicamentos em uso
             </CardTitle>
           </CardHeader>
           <CardContent>
             {medications.length === 0 ? (
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Nenhum medicamento registrado.
               </p>
             ) : (
               <ul className="divide-y">
                 {medications.map((med, i) => (
                   <li key={i} className="py-3 first:pt-0 last:pb-0">
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-foreground">
                       {med.name}
                     </p>
-                    <p className="mt-0.5 text-xs text-gray-500">
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {[med.dosage, med.frequency].filter(Boolean).join(" · ")}
                       {med.startDate && (
                         <> · Início: {formatDate(med.startDate)}</>
@@ -206,13 +211,13 @@ export default function PublicSharePage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
-              <FileText className="h-4 w-4 text-violet-500" />
+              <FileText className="h-4 w-4 text-primary" />
               Documentos recentes
             </CardTitle>
           </CardHeader>
           <CardContent>
             {documents.length === 0 ? (
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-muted-foreground">
                 Nenhum documento disponível.
               </p>
             ) : (
@@ -223,16 +228,16 @@ export default function PublicSharePage() {
                     className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-gray-900">
+                      <p className="truncate text-sm font-medium text-foreground">
                         {doc.title}
                       </p>
                       {doc.aiSummary && (
-                        <p className="mt-0.5 line-clamp-2 text-xs text-gray-500">
+                        <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
                           {doc.aiSummary}
                         </p>
                       )}
                       {doc.createdAt && (
-                        <p className="mt-0.5 text-xs text-gray-400">
+                        <p className="mt-0.5 text-xs text-muted-foreground">
                           {formatDate(doc.createdAt)}
                         </p>
                       )}
@@ -242,7 +247,7 @@ export default function PublicSharePage() {
                         href={doc.fileUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex shrink-0 items-center gap-1 text-xs font-medium text-blue-600 hover:underline"
+                        className="flex shrink-0 items-center gap-1 text-xs font-medium text-primary hover:underline"
                       >
                         Abrir
                         <ExternalLink className="h-3 w-3" />
@@ -259,7 +264,7 @@ export default function PublicSharePage() {
       {/* Footer */}
       <footer className="mt-4 pb-10 text-center">
         <Separator className="mb-6 mx-auto max-w-2xl" />
-        <p className="text-xs text-gray-400 px-6">
+        <p className="text-xs text-muted-foreground px-6">
           Este link é temporário e gerado pelo responsável do paciente. Acesso
           registrado.
         </p>

@@ -54,7 +54,7 @@ function FileIcon({ fileUrl }) {
     );
   if (type === "image")
     return (
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent text-primary">
         <Image className="h-5 w-5" />
       </div>
     );
