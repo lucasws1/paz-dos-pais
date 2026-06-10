@@ -2,7 +2,15 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
@@ -27,54 +35,69 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <div className="mb-2 flex justify-center">
-            <Heart className="h-8 w-8 text-primary" fill="currentColor" />
-          </div>
-          <CardTitle className="text-2xl">Paz dos Pais</CardTitle>
-          <CardDescription>Entre na sua conta para continuar</CardDescription>
+    <div className="from-accent to-background flex min-h-screen flex-col items-center justify-center bg-gradient-to-b p-4">
+      {/* Marca */}
+      <div className="mb-8 flex flex-col items-center gap-3">
+        <div className="bg-primary flex h-12 w-12 items-center justify-center rounded-xl shadow-md">
+          <Heart className="text-primary-foreground h-6 w-6" fill="currentColor" />
+        </div>
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">Paz dos Pais</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            O acompanhamento médico da sua família em um só lugar
+          </p>
+        </div>
+      </div>
+
+      <Card className="w-full max-w-sm shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-lg">Entrar</CardTitle>
+          <CardDescription>
+            Acesse sua conta para acompanhar seus pacientes
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="email">E-mail</label>
-              <input
+              <Label htmlFor="email">E-mail</Label>
+              <Input
                 id="email"
                 type="email"
                 required
-                className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={form.email}
                 onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                 placeholder="voce@email.com"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="password">Senha</label>
-              <input
+              <Label htmlFor="password">Senha</Label>
+              <Input
                 id="password"
                 type="password"
                 required
-                className="flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={form.password}
                 onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
                 placeholder="Sua senha"
               />
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <p className="text-destructive text-sm">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Entrando..." : "Entrar"}
+              {loading ? "Entrando…" : "Entrar"}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-5 text-center text-sm">
             Não tem conta?{" "}
-            <Link to="/register" className="font-medium text-primary hover:underline">
+            <Link to="/register" className="text-primary font-medium hover:underline">
               Cadastre-se
             </Link>
           </p>
         </CardContent>
       </Card>
+
+      <p className="text-muted-foreground mt-8 max-w-sm text-center text-xs">
+        Medicamentos, consultas e exames organizados — e um resumo seguro para
+        levar ao médico.
+      </p>
     </div>
   );
 }

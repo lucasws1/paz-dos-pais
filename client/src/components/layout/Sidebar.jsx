@@ -50,31 +50,38 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="flex h-screen w-56 flex-col border-r bg-card">
+    <aside className="flex h-screen w-60 flex-col border-r bg-sidebar">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-4 py-5">
-        <Heart className="h-6 w-6 text-primary" fill="currentColor" />
-        <span className="text-lg font-semibold tracking-tight">Paz dos Pais</span>
+      <div className="flex items-center gap-3 px-4 py-5">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary shadow-sm">
+          <Heart className="h-[18px] w-[18px] text-primary-foreground" fill="currentColor" />
+        </div>
+        <div className="min-w-0 leading-tight">
+          <p className="text-[15px] font-semibold tracking-tight">Paz dos Pais</p>
+          <p className="text-muted-foreground truncate text-xs">
+            Cuidado em família
+          </p>
+        </div>
       </div>
 
       <Separator />
 
       {/* Navegação */}
-      <nav className="flex-1 space-y-0.5 px-2 py-3">
+      <nav className="flex-1 space-y-0.5 px-3 py-4">
         {NAV_ITEMS.map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                 isActive
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  ? "bg-accent font-semibold text-accent-foreground"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
               )
             }
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="h-4 w-4 shrink-0" />
             {label}
           </NavLink>
         ))}
@@ -90,7 +97,7 @@ export default function Sidebar() {
           </p>
           <button
             onClick={() => setPatientDialogOpen(true)}
-            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
             title="Adicionar paciente"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -102,14 +109,20 @@ export default function Sidebar() {
               key={patient.id}
               onClick={() => setActivePatient(patient)}
               className={cn(
-                "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors",
+                "flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
                 activePatient?.id === patient.id
-                  ? "bg-accent font-medium"
-                  : "text-muted-foreground hover:bg-accent/50"
+                  ? "bg-accent"
+                  : "hover:bg-muted"
               )}
             >
               <Avatar className="h-7 w-7 text-xs">
-                <AvatarFallback className="text-xs">
+                <AvatarFallback
+                  className={cn(
+                    "text-xs",
+                    activePatient?.id === patient.id &&
+                      "bg-primary text-primary-foreground"
+                  )}
+                >
                   {initials(patient.name)}
                 </AvatarFallback>
               </Avatar>

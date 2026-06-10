@@ -9,6 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 
 export default function RegisterPage() {
@@ -48,87 +50,84 @@ export default function RegisterPage() {
     }
   }
 
-  const inputClass =
-    "flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
-
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <div className="mb-2 flex justify-center">
-            <Heart className="h-8 w-8 text-primary" fill="currentColor" />
-          </div>
-          <CardTitle className="text-2xl">Paz dos Pais</CardTitle>
-          <CardDescription>Crie sua conta para começar</CardDescription>
+    <div className="from-accent to-background flex min-h-screen flex-col items-center justify-center bg-gradient-to-b p-4">
+      {/* Marca */}
+      <div className="mb-8 flex flex-col items-center gap-3">
+        <div className="bg-primary flex h-12 w-12 items-center justify-center rounded-xl shadow-md">
+          <Heart className="text-primary-foreground h-6 w-6" fill="currentColor" />
+        </div>
+        <div className="text-center">
+          <h1 className="text-2xl font-semibold tracking-tight">Paz dos Pais</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            O acompanhamento médico da sua família em um só lugar
+          </p>
+        </div>
+      </div>
+
+      <Card className="w-full max-w-sm shadow-sm">
+        <CardHeader>
+          <CardTitle className="text-lg">Criar conta</CardTitle>
+          <CardDescription>
+            Leva menos de um minuto para começar
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="name">
-                Nome completo
-              </label>
-              <input
+              <Label htmlFor="name">Nome completo</Label>
+              <Input
                 id="name"
                 type="text"
                 required
-                className={inputClass}
                 value={form.name}
                 onChange={handleChange}
                 placeholder="Seu nome"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="email">
-                E-mail
-              </label>
-              <input
+              <Label htmlFor="email">E-mail</Label>
+              <Input
                 id="email"
                 type="email"
                 required
-                className={inputClass}
                 value={form.email}
                 onChange={handleChange}
                 placeholder="voce@email.com"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="password">
-                Senha
-              </label>
-              <input
+              <Label htmlFor="password">Senha</Label>
+              <Input
                 id="password"
                 type="password"
                 required
                 minLength={8}
-                className={inputClass}
                 value={form.password}
                 onChange={handleChange}
                 placeholder="Mínimo 8 caracteres"
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-sm font-medium" htmlFor="confirmPassword">
-                Confirmar senha
-              </label>
-              <input
+              <Label htmlFor="confirmPassword">Confirmar senha</Label>
+              <Input
                 id="confirmPassword"
                 type="password"
                 required
                 minLength={8}
-                className={inputClass}
                 value={form.confirmPassword}
                 onChange={handleChange}
                 placeholder="Repita a senha"
               />
             </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
+            {error && <p className="text-destructive text-sm">{error}</p>}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Criando conta..." : "Criar conta"}
+              {loading ? "Criando conta…" : "Criar conta"}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-5 text-center text-sm">
             Já tem conta?{" "}
-            <Link to="/login" className="font-medium text-primary hover:underline">
+            <Link to="/login" className="text-primary font-medium hover:underline">
               Entrar
             </Link>
           </p>

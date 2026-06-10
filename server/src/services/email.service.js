@@ -2,6 +2,15 @@ import { Resend } from "resend";
 
 let resend = null;
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 function getClient() {
   if (!process.env.RESEND_API_KEY) return null;
   if (!resend) resend = new Resend(process.env.RESEND_API_KEY);
@@ -53,16 +62,20 @@ function layout(title, body) {
  * @param {{ to: string | string[], patientName: string, medication: object, time: string }} params
  */
 export async function sendDoseReminderEmail({ to, patientName, medication, time }) {
+  const safePatientName = escapeHtml(patientName);
+  const safeMedicationName = escapeHtml(medication.name);
+  const safeTime = escapeHtml(time);
   const details = [medication.dosage, medication.frequency].filter(Boolean).join(" · ");
+  const safeDetails = escapeHtml(details);
 
   return sendEmail({
     to,
-    subject: `💊 Hora do remédio de ${patientName}: ${medication.name} (${time})`,
+    subject: `💊 Hora do remédio de ${safePatientName}: ${safeMedicationName} (${safeTime})`,
     html: layout(
-      `Hora do remédio — ${time}`,
+      `Hora do remédio — ${safeTime}`,
       `
-        <p><strong>${patientName}</strong> deve tomar agora:</p>
-        <p style="font-size: 18px; margin: 12px 0;"><strong>${medication.name}</strong>${details ? `<br/><span style="font-size: 14px;">${details}</span>` : ""}</p>
+        <p><strong>${safePatientName}</strong> deve tomar agora:</p>
+        <p style="font-size: 18px; margin: 12px 0;"><strong>${safeMedicationName}</strong>${details ? `<br/><span style="font-size: 14px;">${safeDetails}</span>` : ""}</p>
         <p>Após a tomada, registre a dose no painel para manter o histórico de adesão em dia.</p>
       `,
     ),
@@ -74,6 +87,10 @@ export async function sendDoseReminderEmail({ to, patientName, medication, time 
  * @param {{ to: string | string[], patientName: string, appointment: object }} params
  */
 export async function sendAppointmentReminderEmail({ to, patientName, appointment }) {
+  const safePatientName = escapeHtml(patientName);
+  const safeDoctorName = escapeHtml(appointment.doctorName);
+  const safeSpecialty = escapeHtml(appointment.specialty);
+  const safeNotes = escapeHtml(appointment.notes);
   const date = new Date(appointment.dateTime);
   const formatted = date.toLocaleString("pt-BR", {
     day: "2-digit",
@@ -85,17 +102,17 @@ export async function sendAppointmentReminderEmail({ to, patientName, appointmen
 
   return sendEmail({
     to,
-    subject: `📅 Consulta de ${patientName} amanhã: ${appointment.doctorName}`,
+    subject: `📅 Consulta de ${safePatientName} amanhã: ${safeDoctorName}`,
     html: layout(
       "Consulta nas próximas 24 horas",
       `
-        <p><strong>${patientName}</strong> tem consulta marcada:</p>
+        <p><strong>${safePatientName}</strong> tem consulta marcada:</p>
         <p style="font-size: 16px; margin: 12px 0;">
-          <strong>${appointment.doctorName}</strong>
-          ${appointment.specialty ? `<br/>${appointment.specialty}` : ""}
+          <strong>${safeDoctorName}</strong>
+          ${appointment.specialty ? `<br/>${safeSpecialty}` : ""}
           <br/>🕐 ${formatted}
         </p>
-        ${appointment.notes ? `<p style="font-size: 14px;">Notas: ${appointment.notes}</p>` : ""}
+        ${appointment.notes ? `<p style="font-size: 14px;">Notas: ${safeNotes}</p>` : ""}
       `,
     ),
   });

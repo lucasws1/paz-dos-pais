@@ -39,7 +39,7 @@ function DoseRow({ medication, scheduledFor, log, onMark, isPending }) {
 
   return (
     <div className="flex items-center gap-3 py-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-primary">
         <Pill className="h-4 w-4" />
       </div>
 
@@ -149,15 +149,18 @@ export default function DosesPage() {
   const untimedMeds = activeMeds.filter((m) => !m.times);
 
   // Uma linha por dose do dia: horários do medicamento + log correspondente
+  const logsByKey = new Map(
+    logs.map((l) => [
+      `${l.medicationId}-${new Date(l.scheduledFor).getTime()}`,
+      l,
+    ]),
+  );
+
   const slots = timedMeds
     .flatMap((medication) =>
       medication.times.split(",").map((time) => {
         const scheduledFor = slotDate(time.trim());
-        const log = logs.find(
-          (l) =>
-            l.medicationId === medication.id &&
-            new Date(l.scheduledFor).getTime() === scheduledFor.getTime(),
-        );
+        const log = logsByKey.get(`${medication.id}-${scheduledFor.getTime()}`);
         return { medication, scheduledFor, log };
       }),
     )
@@ -235,7 +238,7 @@ export default function DosesPage() {
                   key={medication.id}
                   className="flex items-center gap-3 py-3"
                 >
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-primary">
                     <Pill className="h-4 w-4" />
                   </div>
                   <div className="min-w-0 flex-1">
