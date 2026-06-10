@@ -21,7 +21,9 @@ const upload = multer({
     if (allowed.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Tipo de arquivo não permitido. Use: JPEG, PNG ou WebP."));
+      const err = new Error("Tipo de arquivo não permitido. Use: JPEG, PNG ou WebP.");
+      err.status = 400;
+      cb(err);
     }
   },
 });
