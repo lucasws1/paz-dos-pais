@@ -57,22 +57,31 @@ export const createMedicationLog = catchAsync(async (req, res) => {
 
   // Upsert pelo par (medicationId, scheduledFor): se o scheduler já criou o
   // log PENDING da dose, a confirmação do cuidador apenas atualiza o status.
+  const scheduled = new Date(scheduledFor);
+  scheduled.setSeconds(0, 0);
+
+  const resolvedTakenAt = takenAt
+    ? new Date(takenAt)
+    : status === "TAKEN"
+      ? new Date()
+      : null;
+
   const log = await prisma.medicationLog.upsert({
     where: {
       medicationId_scheduledFor: {
         medicationId,
-        scheduledFor: new Date(scheduledFor),
+        scheduledFor: scheduled,
       },
     },
     create: {
       medicationId,
-      scheduledFor: new Date(scheduledFor),
+      scheduledFor: scheduled,
       status: status ?? "PENDING",
-      takenAt: takenAt ? new Date(takenAt) : status === "TAKEN" ? new Date() : null,
+      takenAt: resolvedTakenAt,
     },
     update: {
       status: status ?? "PENDING",
-      takenAt: takenAt ? new Date(takenAt) : status === "TAKEN" ? new Date() : null,
+      takenAt: resolvedTakenAt,
     },
   });
 
