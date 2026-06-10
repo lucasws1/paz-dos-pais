@@ -149,11 +149,18 @@ export function startScheduler() {
     return;
   }
 
-  cron.schedule("* * * * *", () =>
-    processDoseReminders().catch((err) =>
-      console.error("[scheduler] processDoseReminders falhou:", err),
-    ),
-  );
+  let doseRemindersRunning = false;
+  cron.schedule("* * * * *", async () => {
+    if (doseRemindersRunning) return;
+    doseRemindersRunning = true;
+    try {
+      await processDoseReminders();
+    } catch (err) {
+      console.error("[scheduler] processDoseReminders falhou:", err);
+    } finally {
+      doseRemindersRunning = false;
+    }
+  });
 
   cron.schedule("0 * * * *", () =>
     processAppointmentReminders().catch((err) =>
