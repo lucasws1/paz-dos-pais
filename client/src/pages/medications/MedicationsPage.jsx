@@ -9,6 +9,7 @@ import {
   Trash2,
   MoreHorizontal,
   CalendarDays,
+  Sparkles,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,7 @@ import {
 import api from "@/services/api";
 import { usePatient } from "@/context/PatientContext";
 import MedicationDialog from "./MedicationDialog";
+import MedicationExtractDialog from "./MedicationExtractDialog";
 
 function formatDate(isoString) {
   if (!isoString) return null;
@@ -149,6 +151,7 @@ export default function MedicationsPage() {
   const patientId = activePatient?.id;
 
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [extractDialogOpen, setExtractDialogOpen] = useState(false);
   const [editingMedication, setEditingMedication] = useState(null);
   const [deletingMedication, setDeletingMedication] = useState(null);
 
@@ -251,10 +254,20 @@ export default function MedicationsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Medicamentos</h1>
-        <Button size="sm" onClick={openCreate}>
-          <Plus className="mr-2 h-4 w-4" />
-          Adicionar medicamento
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setExtractDialogOpen(true)}
+          >
+            <Sparkles className="mr-2 h-4 w-4" />
+            Ler receita (IA)
+          </Button>
+          <Button size="sm" onClick={openCreate}>
+            <Plus className="mr-2 h-4 w-4" />
+            Adicionar medicamento
+          </Button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -306,6 +319,13 @@ export default function MedicationsPage() {
         onOpenChange={handleDialogChange}
         patientId={patientId}
         medication={editingMedication}
+      />
+
+      {/* Dialog de extração via foto de receita */}
+      <MedicationExtractDialog
+        open={extractDialogOpen}
+        onOpenChange={setExtractDialogOpen}
+        patientId={patientId}
       />
 
       {/* AlertDialog confirmar exclusão */}
