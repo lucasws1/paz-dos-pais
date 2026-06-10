@@ -8,7 +8,11 @@ import {
   updatePatient,
   deletePatient,
 } from "../controllers/patients.controller.js";
-import { createShareToken } from "../controllers/share.controller.js";
+import {
+  createShareToken,
+  listShareTokens,
+  revokeShareToken,
+} from "../controllers/share.controller.js";
 
 const router = Router();
 
@@ -24,6 +28,12 @@ router.put(
   updatePatient,
 );
 router.delete("/:patientId", requirePermission("OWNER"), deletePatient);
+router.get("/:patientId/share", requirePermission("OWNER"), listShareTokens);
 router.post("/:patientId/share", requirePermission("OWNER"), createShareToken);
+router.delete(
+  "/:patientId/share/:tokenId",
+  requirePermission("OWNER"),
+  revokeShareToken,
+);
 
 export default router;

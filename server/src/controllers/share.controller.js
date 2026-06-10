@@ -24,6 +24,33 @@ export const createShareToken = catchAsync(async (req, res) => {
   return res.status(201).json(shareToken);
 });
 
+export const listShareTokens = catchAsync(async (req, res) => {
+  const { patientId } = req.params;
+
+  const tokens = await prisma.shareToken.findMany({
+    where: { patientId },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const now = new Date();
+  return res.json(tokens.map((t) => ({ ...t, expired: now > t.expiresAt })));
+});
+
+export const revokeShareToken = catchAsync(async (req, res) => {
+  const { patientId, tokenId } = req.params;
+
+  const existing = await prisma.shareToken.findFirst({
+    where: { id: tokenId, patientId },
+  });
+
+  if (!existing) {
+    return res.status(404).json({ error: "Token não encontrado." });
+  }
+
+  await prisma.shareToken.delete({ where: { id: tokenId } });
+  return res.status(204).send();
+});
+
 export const getSharedPatient = catchAsync(async (req, res) => {
   const { token } = req.params;
 
