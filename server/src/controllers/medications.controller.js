@@ -184,10 +184,14 @@ export const extractFromReceipt = catchAsync(async (req, res) => {
       .json({ error: "É obrigatório enviar a foto da receita." });
   }
 
-  const [{ url: receiptUrl }, { medications }] = await Promise.all([
-    uploadFile(req.file, `patients/${patientId}/receipts`),
-    extractMedicationsFromImage(req.file.buffer, req.file.mimetype),
-  ]);
+  const { medications } = await extractMedicationsFromImage(
+    req.file.buffer,
+    req.file.mimetype,
+  );
+  const { url: receiptUrl } = await uploadFile(
+    req.file,
+    `patients/${patientId}/receipts`,
+  );
 
   return res.json({ receiptUrl, medications });
 });

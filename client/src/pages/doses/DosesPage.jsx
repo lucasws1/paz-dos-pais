@@ -149,15 +149,18 @@ export default function DosesPage() {
   const untimedMeds = activeMeds.filter((m) => !m.times);
 
   // Uma linha por dose do dia: horários do medicamento + log correspondente
+  const logsByKey = new Map(
+    logs.map((l) => [
+      `${l.medicationId}-${new Date(l.scheduledFor).getTime()}`,
+      l,
+    ]),
+  );
+
   const slots = timedMeds
     .flatMap((medication) =>
       medication.times.split(",").map((time) => {
         const scheduledFor = slotDate(time.trim());
-        const log = logs.find(
-          (l) =>
-            l.medicationId === medication.id &&
-            new Date(l.scheduledFor).getTime() === scheduledFor.getTime(),
-        );
+        const log = logsByKey.get(`${medication.id}-${scheduledFor.getTime()}`);
         return { medication, scheduledFor, log };
       }),
     )

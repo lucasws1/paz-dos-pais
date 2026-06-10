@@ -54,7 +54,7 @@ export default function Sidebar() {
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary shadow-sm">
-          <Heart className="h-4.5 w-4.5 text-primary-foreground" fill="currentColor" />
+          <Heart className="h-[18px] w-[18px] text-primary-foreground" fill="currentColor" />
         </div>
         <div className="min-w-0 leading-tight">
           <p className="text-[15px] font-semibold tracking-tight">Paz dos Pais</p>
