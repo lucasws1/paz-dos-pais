@@ -66,7 +66,10 @@ export const createMedication = catchAsync(async (req, res) => {
   if (times && !isValidTimes(times)) {
     return res
       .status(400)
-      .json({ error: 'times inválido. Use horários HH:mm separados por vírgula, ex: "08:00,20:00".' });
+      .json({
+        error:
+          'times inválido. Use horários HH:mm separados por vírgula, ex: "08:00,20:00".',
+      });
   }
 
   if (source && !VALID_SOURCES.includes(source)) {
@@ -140,7 +143,10 @@ export const updateMedication = catchAsync(async (req, res) => {
   if (times && !isValidTimes(times)) {
     return res
       .status(400)
-      .json({ error: 'times inválido. Use horários HH:mm separados por vírgula, ex: "08:00,20:00".' });
+      .json({
+        error:
+          'times inválido. Use horários HH:mm separados por vírgula, ex: "08:00,20:00".',
+      });
   }
 
   const data = {};

@@ -10,7 +10,7 @@ export default function AppLayout() {
 
   return (
     <TooltipProvider>
-      <div className="flex h-screen overflow-hidden bg-background">
+      <div className="bg-background flex h-screen overflow-hidden">
         <Sidebar />
         <main className="flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-6xl">

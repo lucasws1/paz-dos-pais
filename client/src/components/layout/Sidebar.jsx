@@ -11,7 +11,10 @@ import {
   LogOut,
   Heart,
   Plus,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useTheme } from "@/context/ThemeContext";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
@@ -41,6 +44,7 @@ function initials(name = "") {
 export default function Sidebar() {
   const { user, logout } = useAuth();
   const { patients, activePatient, setActivePatient } = usePatient();
+  const { dark, toggle } = useTheme();
   const navigate = useNavigate();
   const [patientDialogOpen, setPatientDialogOpen] = useState(false);
 
@@ -50,14 +54,19 @@ export default function Sidebar() {
   }
 
   return (
-    <aside className="flex h-screen w-60 flex-col border-r bg-sidebar">
+    <aside className="bg-sidebar flex h-screen w-60 flex-col border-r">
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary shadow-sm">
-          <Heart className="h-[18px] w-[18px] text-primary-foreground" fill="currentColor" />
+        <div className="bg-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg shadow-sm">
+          <Heart
+            className="text-primary-foreground h-4.5 w-4.5"
+            fill="currentColor"
+          />
         </div>
         <div className="min-w-0 leading-tight">
-          <p className="text-[15px] font-semibold tracking-tight">Paz dos Pais</p>
+          <p className="text-[15px] font-semibold tracking-tight">
+            Paz dos Pais
+          </p>
           <p className="text-muted-foreground truncate text-xs">
             Cuidado em família
           </p>
@@ -76,8 +85,8 @@ export default function Sidebar() {
               cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
                 isActive
-                  ? "bg-accent font-semibold text-accent-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  ? "bg-accent text-accent-foreground font-semibold"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )
             }
           >
@@ -92,12 +101,12 @@ export default function Sidebar() {
       {/* Lista de pacientes */}
       <div className="px-3 py-3">
         <div className="mb-2 flex items-center justify-between px-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
             Pacientes
           </p>
           <button
             onClick={() => setPatientDialogOpen(true)}
-            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+            className="text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md p-1 transition-colors"
             title="Adicionar paciente"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -112,7 +121,7 @@ export default function Sidebar() {
                 "flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-sm transition-colors",
                 activePatient?.id === patient.id
                   ? "bg-accent"
-                  : "hover:bg-muted"
+                  : "hover:bg-muted",
               )}
             >
               <Avatar className="h-7 w-7 text-xs">
@@ -120,17 +129,17 @@ export default function Sidebar() {
                   className={cn(
                     "text-xs",
                     activePatient?.id === patient.id &&
-                      "bg-primary text-primary-foreground"
+                      "bg-primary text-primary-foreground",
                   )}
                 >
                   {initials(patient.name)}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium leading-none text-foreground">
+                <p className="text-foreground truncate text-sm leading-none font-medium">
                   {patient.name}
                 </p>
-                <p className="truncate text-xs text-muted-foreground capitalize">
+                <p className="text-muted-foreground truncate text-xs capitalize">
                   {patient.role?.toLowerCase()}
                 </p>
               </div>
@@ -143,19 +152,30 @@ export default function Sidebar() {
 
       {/* Usuário + logout */}
       <div className="flex items-center justify-between px-3 py-3">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex min-w-0 items-center gap-2">
           <Avatar className="h-7 w-7">
-            <AvatarFallback className="text-xs">{initials(user?.name)}</AvatarFallback>
+            <AvatarFallback className="text-xs">
+              {initials(user?.name)}
+            </AvatarFallback>
           </Avatar>
           <span className="truncate text-sm font-medium">{user?.name}</span>
         </div>
-        <button
-          onClick={handleLogout}
-          className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-          title="Sair"
-        >
-          <LogOut className="h-4 w-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={toggle}
+            className="text-muted-foreground hover:bg-accent hover:text-foreground rounded-md p-1.5 transition-colors"
+            title={dark ? "Modo claro" : "Modo escuro"}
+          >
+            {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+          <button
+            onClick={handleLogout}
+            className="text-muted-foreground hover:bg-accent hover:text-foreground rounded-md p-1.5 transition-colors"
+            title="Sair"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
       </div>
 
       <PatientDialog
