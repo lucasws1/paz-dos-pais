@@ -50,6 +50,7 @@ export const createMedication = catchAsync(async (req, res) => {
     name,
     dosage,
     frequency,
+    intervalDays,
     times,
     startDate,
     endDate,
@@ -61,6 +62,15 @@ export const createMedication = catchAsync(async (req, res) => {
 
   if (!name) {
     return res.status(400).json({ error: "name é obrigatório." });
+  }
+
+  if (
+    intervalDays !== undefined &&
+    (!Number.isInteger(Number(intervalDays)) || Number(intervalDays) < 1)
+  ) {
+    return res
+      .status(400)
+      .json({ error: "intervalDays deve ser um inteiro maior ou igual a 1." });
   }
 
   if (times && !isValidTimes(times)) {
@@ -84,6 +94,7 @@ export const createMedication = catchAsync(async (req, res) => {
       name,
       dosage: dosage ?? null,
       frequency: frequency ?? null,
+      intervalDays: intervalDays !== undefined ? Number(intervalDays) : 1,
       times: times ? normalizeTimes(times) : null,
       startDate: startDate ? new Date(startDate) : null,
       endDate: endDate ? new Date(endDate) : null,
@@ -117,6 +128,7 @@ export const updateMedication = catchAsync(async (req, res) => {
     name,
     dosage,
     frequency,
+    intervalDays,
     times,
     startDate,
     endDate,
@@ -140,6 +152,15 @@ export const updateMedication = catchAsync(async (req, res) => {
       .json({ error: `source inválido. Use: ${VALID_SOURCES.join(", ")}.` });
   }
 
+  if (
+    intervalDays !== undefined &&
+    (!Number.isInteger(Number(intervalDays)) || Number(intervalDays) < 1)
+  ) {
+    return res
+      .status(400)
+      .json({ error: "intervalDays deve ser um inteiro maior ou igual a 1." });
+  }
+
   if (times && !isValidTimes(times)) {
     return res
       .status(400)
@@ -153,6 +174,7 @@ export const updateMedication = catchAsync(async (req, res) => {
   if (name !== undefined) data.name = name;
   if (dosage !== undefined) data.dosage = dosage;
   if (frequency !== undefined) data.frequency = frequency;
+  if (intervalDays !== undefined) data.intervalDays = Number(intervalDays);
   if (times !== undefined) data.times = times ? normalizeTimes(times) : null;
   if (startDate !== undefined)
     data.startDate = startDate ? new Date(startDate) : null;

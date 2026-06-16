@@ -55,6 +55,15 @@ export async function processDoseReminders(now = new Date()) {
     const times = (medication.times ?? "").split(",").map((t) => t.trim());
     if (!times.includes(time)) continue;
 
+    // Verifica se hoje é um dia de dose com base no intervalDays
+    const intervalDays = medication.intervalDays ?? 1;
+    if (intervalDays > 1) {
+      const origin = medication.startDate ?? medication.createdAt;
+      const msPerDay = 24 * 60 * 60 * 1000;
+      const diffDays = Math.floor((now - origin) / msPerDay);
+      if (diffDays % intervalDays !== 0) continue;
+    }
+
     const scheduledFor = new Date(now);
     scheduledFor.setSeconds(0, 0);
 

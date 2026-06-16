@@ -11,12 +11,28 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import api from "@/services/api";
+
+const INTERVAL_OPTIONS = [
+  { value: "1", label: "Diário" },
+  { value: "2", label: "A cada 2 dias" },
+  { value: "7", label: "Semanal" },
+  { value: "14", label: "Quinzenal" },
+  { value: "30", label: "Mensal" },
+];
 
 const EMPTY_FORM = {
   name: "",
   dosage: "",
   frequency: "",
+  intervalDays: "1",
   times: "",
   startDate: "",
   endDate: "",
@@ -49,6 +65,7 @@ function buildForm(medication) {
     name: medication.name ?? "",
     dosage: medication.dosage ?? "",
     frequency: medication.frequency ?? "",
+    intervalDays: String(medication.intervalDays ?? 1),
     times: medication.times ?? "",
     startDate: toInputDate(medication.startDate),
     endDate: toInputDate(medication.endDate),
@@ -102,6 +119,7 @@ export default function MedicationDialog({
       name: form.name.trim(),
       dosage: form.dosage.trim() || null,
       frequency: form.frequency.trim() || null,
+      intervalDays: Number(form.intervalDays),
       times: form.times.trim() || null,
       startDate: toISOOrNull(form.startDate),
       endDate: toISOOrNull(form.endDate),
@@ -162,22 +180,42 @@ export default function MedicationDialog({
             </div>
           </div>
 
-          {/* Horários das doses */}
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="med-times">Horários das doses</Label>
-            <Input
-              id="med-times"
-              placeholder="Ex: 08:00, 20:00"
-              value={form.times}
-              onChange={(e) => set("times", e.target.value)}
-            />
-            {errors.times ? (
-              <p className="text-destructive text-xs">{errors.times}</p>
-            ) : (
-              <p className="text-muted-foreground text-xs">
-                Usados nos lembretes por e-mail e na lista de doses do dia.
-              </p>
-            )}
+          {/* Horários das doses + Intervalo */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="med-times">Horários das doses</Label>
+              <Input
+                id="med-times"
+                placeholder="Ex: 08:00, 20:00"
+                value={form.times}
+                onChange={(e) => set("times", e.target.value)}
+              />
+              {errors.times ? (
+                <p className="text-destructive text-xs">{errors.times}</p>
+              ) : (
+                <p className="text-muted-foreground text-xs">
+                  Lembretes por e-mail.
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="med-interval">Intervalo</Label>
+              <Select
+                value={form.intervalDays}
+                onValueChange={(v) => set("intervalDays", v)}
+              >
+                <SelectTrigger id="med-interval">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {INTERVAL_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Datas */}

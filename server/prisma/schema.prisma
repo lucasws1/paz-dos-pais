@@ -69,6 +69,7 @@ model Medication {
   name          String
   dosage        String?
   frequency     String?
+  intervalDays  Int?    @default(1) // a cada quantos dias tomar: 1=diário, 7=semanal, 14=quinzenal, 30=mensal
   times         String? // horários das doses, separados por vírgula: "08:00,20:00"
   startDate     DateTime?
   endDate       DateTime?
